@@ -49,8 +49,8 @@ public class TransactionService
 
         var transactionDto = new TransactionDto
         {
-            Id = Guid.NewGuid().ToString(),
-            Date = DateTime.UtcNow,
+            Id = transaction.Id,
+            Date = transaction.Date,
             Amount = transaction.Amount,
             Type = transaction.Type,
             Status = TransactionStatus.Pending,
