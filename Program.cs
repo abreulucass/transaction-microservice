@@ -1,4 +1,5 @@
 using MongoDB.Driver;
+using TransactionMicroservice.Application;
 using TransactionMicroservice.Infrastructure;
 using TransactionMicroservice.Infrastructure.Configurations;
 
@@ -16,6 +17,7 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 // --------------------------------------------------------- //
 
 builder.Services.AddInfrastructure();
+builder.Services.AddApplication();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
