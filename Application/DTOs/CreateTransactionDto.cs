@@ -5,8 +5,6 @@ namespace TransactionMicroservice.Application.DTOs;
 
 public class CreateTransactionDto
 {
-    public DateTime Date { get; set; }
-    
     [Required(ErrorMessage = "O Valor da transação é obrigatorio")]
     public decimal Amount { get; set; }
     

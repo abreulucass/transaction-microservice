@@ -1,3 +1,4 @@
+using MongoDB.Bson;
 using TransactionMicroservice.Application.DTOs;
 using TransactionMicroservice.Domain.Entities;
 using TransactionMicroservice.Domain.Enums;
@@ -32,8 +33,19 @@ public class TransactionService
         };
         
         await _repository.CreateAsync(transaction);
+
+        var transactionMessage = new TransactionMessageDto
+        {
+            Id = transaction.Id,
+            Date = transaction.Date,
+            Amount = transaction.Amount,
+            Type = transaction.Type,
+            Status = transaction.Status,
+            Sender = transaction.Sender,
+            Receiver = transaction.Receiver,
+        };
         
-        await _queueService.SendTransactionAsync(transaction, "transactions-queue");
+        await _queueService.SendTransactionAsync(transactionMessage);
 
         var transactionDto = new TransactionDto
         {

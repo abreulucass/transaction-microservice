@@ -10,7 +10,7 @@ public static class InfrastructureModule
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddSingleton<ITransactionRepository, DbTransacationRepository>();
-        services.AddSingleton<ITransactionQueueService, FakeServiceBusClient>();
+        services.AddSingleton<ITransactionQueueService, MessageSenderService>();
         return services;
     } 
 }
