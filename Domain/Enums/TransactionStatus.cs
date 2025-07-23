@@ -1,6 +1,8 @@
 namespace TransactionMicroservice.Domain.Enums;
 
-public class TransactionStatus
+public enum TransactionStatus
 {
-    
+    Pending,
+    Completed,
+    Failed
 }
