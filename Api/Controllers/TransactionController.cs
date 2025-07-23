@@ -20,31 +20,11 @@ public class TransactionController: ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionDto dto)
     {
-        var transaction = new Transaction
-        {
-            Id = Guid.NewGuid().ToString(),
-            Date = dto.Date,
-            Amount = dto.Amount,
-            Type = dto.Type,
-            Status = TransactionStatus.Pending,
-            Sender = dto.Sender,
-            Receiver = dto.Receiver,
-        };
+        var transactionDto = await _transactionService.CreateTransaction(dto);
 
-        await _transactionService.CreateTransaction(transaction);
-
-        var response = new TransactionDto
-        {
-            Id = transaction.Id,
-            Date = transaction.Date,
-            Amount = transaction.Amount,
-            Type = transaction.Type,
-            Status = transaction.Status,
-            Sender = transaction.Sender,
-            Receiver = transaction.Receiver,
-        };
+        var response = transactionDto;
         
-        return CreatedAtAction(nameof(GetAllTransactions), new { id = transaction.Id }, response);
+        return CreatedAtAction(nameof(GetAllTransactions), new { id = transactionDto.Id }, response);
     }
     
     [HttpGet]
@@ -52,17 +32,6 @@ public class TransactionController: ControllerBase
     {
         var transactions = await _transactionService.GetAllTransactions();
         
-        var response = transactions.Select(transaction => new TransactionDto
-        {
-            Id = transaction.Id,
-            Date = transaction.Date,
-            Amount = transaction.Amount,
-            Type = transaction.Type,
-            Status = transaction.Status,
-            Sender = transaction.Sender,
-            Receiver = transaction.Receiver,
-        }).ToList();
-        
-        return Ok(response);
+        return Ok(transactions);
     }
 }
