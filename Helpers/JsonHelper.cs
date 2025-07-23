@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TransactionMicroservice.helpers;
+namespace TransactionMicroservice.Helpers;
 
 public class JsonHelper
 {

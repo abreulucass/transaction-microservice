@@ -1,6 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using TransactionMicroservice.Domain.Interfaces;
-using TransactionMicroservice.helpers;
+using TransactionMicroservice.Helpers;
 
 namespace TransactionMicroservice.Infrastructure.Messaging;
 
