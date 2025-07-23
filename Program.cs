@@ -1,5 +1,21 @@
+using MongoDB.Driver;
+using TransactionMicroservice.Infrastructure;
+using TransactionMicroservice.Infrastructure.Configurations;
+
 var builder = WebApplication.CreateBuilder(args);
 
+// -------------- Configuracao do Banco de Dados ------------//
+builder.Services.Configure<MongoDbSettings>(
+    builder.Configuration.GetSection("MongoDbSettings"));
+
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var config = builder.Configuration.GetConnectionString("MongoDb");
+    return new MongoClient(config);
+});
+// --------------------------------------------------------- //
+
+builder.Services.AddInfrastructure();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
