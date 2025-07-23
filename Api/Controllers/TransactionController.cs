@@ -1,87 +1,68 @@
-using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
+using TransactionMicroservice.Application.DTOs;
+using TransactionMicroservice.Application.Services;
+using TransactionMicroservice.Domain.Entities;
+using TransactionMicroservice.Domain.Enums;
 
 namespace TransactionMicroservice.Api.Controllers;
 
-public class Transaction
-{
-    public string Id { get; set; }
-    public DateTime Date { get; set; }
-    public decimal Amount { get; set; }
-
-    public string Type { get; set; }        
-    public string Status { get; set; }    
-
-    public string Sender { get; set; }               
-    public string Recipient { get; set; } 
-}
-
-
 [ApiController]
 [Route("/[controller]")]
-public class TransactionController
+public class TransactionController: ControllerBase
 {
-    private List<Transaction> transactions =
-    [
-        new Transaction
-        {
-            Id = Guid.NewGuid().ToString(),
-            Amount = 250,
-            Type = "Credit",
-            Status = "completed",
-            Sender = "ana.silva",
-            Recipient = "lucas.matos",
-            Date = DateTime.UtcNow.AddDays(-3)
-        },
+    private readonly TransactionService _transactionService;
 
-        new Transaction
+    public TransactionController(TransactionService transactionService)
+    {
+        _transactionService = transactionService;
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionDto dto)
+    {
+        var transaction = new Transaction
         {
             Id = Guid.NewGuid().ToString(),
-            Amount = 120,
-            Type = "Debit",
-            Status = "pending",
-            Sender = "lucas.matos",
-            Recipient = "joao.pereira",
-            Date = DateTime.UtcNow.AddDays(-1)
-        },
+            Date = dto.Date,
+            Amount = dto.Amount,
+            Type = dto.Type,
+            Status = TransactionStatus.Pending,
+            Sender = dto.Sender,
+            Receiver = dto.Receiver,
+        };
 
-        new Transaction
-        {
-            Id = Guid.NewGuid().ToString(),
-            Amount = 560,
-            Type = "Credit",
-            Status = "failed",
-            Sender = "empresa.xyz",
-            Recipient = "lucas.matos",
-            Date = DateTime.UtcNow.AddDays(-5)
-        },
+        await _transactionService.CreateTransaction(transaction);
 
-        new Transaction
+        var response = new TransactionDto
         {
-            Id = Guid.NewGuid().ToString(),
-            Amount = 50,
-            Type = "Debit",
-            Status = "COmpleted",
-            Sender = "lucas.matos",
-            Recipient = "mercado.local",
-            Date = DateTime.UtcNow
-        },
-
-        new Transaction
-        {
-            Id = Guid.NewGuid().ToString(),
-            Amount = 1000,
-            Type = "Credit",
-            Status = "Completed",
-            Sender = "cliente.vip",
-            Recipient = "lucas.matos",
-            Date = DateTime.UtcNow.AddHours(-6)
-        }
-    ];
+            Id = transaction.Id,
+            Date = transaction.Date,
+            Amount = transaction.Amount,
+            Type = transaction.Type,
+            Status = transaction.Status,
+            Sender = transaction.Sender,
+            Receiver = transaction.Receiver,
+        };
+        
+        return CreatedAtAction(nameof(GetAllTransactions), new { id = transaction.Id }, response);
+    }
     
     [HttpGet]
-    public List<Transaction> GetAllTransactions()
+    public async Task<IActionResult> GetAllTransactions()
     {
-        return this.transactions;
+        var transactions = await _transactionService.GetAllTransactions();
+        
+        var response = transactions.Select(transaction => new TransactionDto
+        {
+            Id = transaction.Id,
+            Date = transaction.Date,
+            Amount = transaction.Amount,
+            Type = transaction.Type,
+            Status = transaction.Status,
+            Sender = transaction.Sender,
+            Receiver = transaction.Receiver,
+        }).ToList();
+        
+        return Ok(response);
     }
 }
