@@ -18,20 +18,16 @@ public class TransactionService
         _repository = repository;
         _queueService = queueService;
     }
-    
+
     public async Task<TransactionDto> CreateTransaction(CreateTransactionDto createTransactionDto)
     {
-        var transaction = new Transaction
-        {
-            Id = Guid.NewGuid().ToString(),
-            Date = DateTime.UtcNow,
-            Amount = createTransactionDto.Amount,
-            Type = createTransactionDto.Type,
-            Status = TransactionStatus.Pending,
-            Sender = createTransactionDto.Sender,
-            Receiver = createTransactionDto.Receiver,
-        };
-        
+        var transaction = new Transaction(
+            amount: createTransactionDto.Amount,
+            type: createTransactionDto.Type,
+            sender: createTransactionDto.Sender,
+            receiver: createTransactionDto.Receiver
+        );
+
         await _repository.CreateAsync(transaction);
 
         var transactionMessage = new TransactionMessageDto
@@ -53,7 +49,7 @@ public class TransactionService
             Date = transaction.Date,
             Amount = transaction.Amount,
             Type = transaction.Type,
-            Status = TransactionStatus.Pending,
+            Status = transaction.Status,
             Sender = transaction.Sender,
             Receiver = transaction.Receiver,
         };
