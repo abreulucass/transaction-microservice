@@ -14,6 +14,7 @@ public class TransactionServiceTests
     private readonly Mock<ITransactionQueueService> _queueServiceMock;
     private readonly TransactionService _transactionService;
 
+    // Mock do Service
     public TransactionServiceTests()
     {
         _repositoryMock = new Mock<ITransactionRepository>();

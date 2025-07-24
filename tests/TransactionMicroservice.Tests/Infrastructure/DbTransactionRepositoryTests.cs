@@ -11,46 +11,53 @@ namespace TransactionMicroservice.Tests.Infrastructure;
 
 public class DbTransactionRepositoryTests
 {
-    [Fact]
-    public async Task GetAllTransactionsAsync_ShouldReturnEmptyList_WhenNoTransactionsExist()
+    private Mock<IMongoClient> _mockClient;
+    private Mock<IMongoDatabase> _mockDatabase;
+    private Mock<IMongoCollection<Transaction>> _mockCollection;
+    private IOptions<MongoDbSettings> _mockSettings;
+    
+    public DbTransactionRepositoryTests()
     {
-        // Mock
-        var mockCursor = new Mock<IAsyncCursor<Transaction>>();
-        mockCursor.SetupSequence(x => x.MoveNext(It.IsAny<CancellationToken>()))
-            .Returns(true)
-            .Returns(false);
-        mockCursor.Setup(x => x.Current).Returns(new List<Transaction>());
-
-        var mockCollection = new Mock<IMongoCollection<Transaction>>();
-        mockCollection
-            .Setup(x => x.FindAsync(
-                It.IsAny<FilterDefinition<Transaction>>(),
-                It.IsAny<FindOptions<Transaction, Transaction>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(mockCursor.Object);
-
-        var mockDatabase = new Mock<IMongoDatabase>();
-        mockDatabase
-            .Setup(d => d.GetCollection<Transaction>(It.IsAny<string>(), null))
-            .Returns(mockCollection.Object);
-
-        var mockClient = new Mock<IMongoClient>();
-        mockClient
-            .Setup(c => c.GetDatabase(It.IsAny<string>(), null))
-            .Returns(mockDatabase.Object);
-
-        var mockSettings = Options.Create(new MongoDbSettings
+        _mockClient = new Mock<IMongoClient>();
+        _mockDatabase = new Mock<IMongoDatabase>();
+        _mockCollection = new Mock<IMongoCollection<Transaction>>();
+        _mockSettings = Options.Create(new MongoDbSettings
         {
             DatabaseName = "TestDb",
             CollectionName = "Transactions"
         });
 
-        var repository = new DbTransacationRepository(mockClient.Object, mockSettings);
+        _mockClient.Setup(c => c.GetDatabase(It.IsAny<string>(), null))
+            .Returns(_mockDatabase.Object);
 
-        // Chama a funcao
+        _mockDatabase.Setup(db => db.GetCollection<Transaction>(It.IsAny<string>(), null))
+            .Returns(_mockCollection.Object);
+    }
+
+    private IAsyncCursor<Transaction> CreateAsyncCursor(List<Transaction> list)
+    {
+        var mockCursor = new Mock<IAsyncCursor<Transaction>>();
+        mockCursor.Setup(_ => _.Current).Returns(list);
+        mockCursor.SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true)
+            .ReturnsAsync(false);
+        return mockCursor.Object;
+    }
+    
+    [Fact]
+    public async Task GetAllTransactionsAsync_ShouldReturnEmptyList_WhenNoTransactionsExist()
+    {
+        var cursor = CreateAsyncCursor(new List<Transaction>());
+        _mockCollection
+            .Setup(x => x.FindAsync(It.IsAny<FilterDefinition<Transaction>>(),
+                It.IsAny<FindOptions<Transaction, Transaction>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cursor);
+
+        var repository = new DbTransacationRepository(_mockClient.Object, _mockSettings);
+
         var result = await repository.GetAllTransactionsAsync();
 
-        // Esperado
         Assert.NotNull(result);
         Assert.Empty(result);
     }
@@ -58,100 +65,50 @@ public class DbTransactionRepositoryTests
     [Fact]
     public async Task CreateAsync_ShouldCallInsertOneAsync()
     {
-        // Mock
         var transaction = new Transaction(100m, TransactionType.Credit, "Teste", "Banco X");
 
-        var mockCollection = new Mock<IMongoCollection<Transaction>>();
-        mockCollection
+        _mockCollection
             .Setup(c => c.InsertOneAsync(transaction, null, default))
             .Returns(Task.CompletedTask)
-            .Verifiable(); // Marca que precisa ser chamado
+            .Verifiable();
 
-        var mockDatabase = new Mock<IMongoDatabase>();
-        mockDatabase
-            .Setup(d => d.GetCollection<Transaction>(It.IsAny<string>(), null))
-            .Returns(mockCollection.Object);
+        var repository = new DbTransacationRepository(_mockClient.Object, _mockSettings);
 
-        var mockClient = new Mock<IMongoClient>();
-        mockClient
-            .Setup(c => c.GetDatabase(It.IsAny<string>(), null))
-            .Returns(mockDatabase.Object);
-
-        var mockSettings = Options.Create(new MongoDbSettings
-        {
-            DatabaseName = "TestDb",
-            CollectionName = "Transactions"
-        });
-
-        var repository = new DbTransacationRepository(mockClient.Object, mockSettings);
-
-        // Chama a funcao
         await repository.CreateAsync(transaction);
 
-        // Esperado
-        mockCollection.Verify(c => c.InsertOneAsync(transaction, null, default), Times.Once);
+        _mockCollection.Verify(c => c.InsertOneAsync(transaction, null, default), Times.Once);
     }
     
     [Fact]
     public async Task GetAllTransactionsAsync_ShouldReturnMockedTransactions()
     {
-        // Mock
         var mockedTransactions = new List<Transaction>
         {
             new Transaction(100m, TransactionType.Credit, "Lucas", "Maria"),
             new Transaction(50m, TransactionType.Debit, "Mario", "Patricia"),
         };
 
-        // Mock do cursor retornando as transações
-        var mockCursor = new Mock<IAsyncCursor<Transaction>>();
-        mockCursor.Setup(_ => _.Current).Returns(mockedTransactions);
-        mockCursor
-            .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true)   // primeira chamada: tem dados
-            .ReturnsAsync(false); // segunda chamada: fim dos dados
+        var cursor = CreateAsyncCursor(mockedTransactions);
 
-        // Mock da coleção para retornar o cursor
-        var mockCollection = new Mock<IMongoCollection<Transaction>>();
-        mockCollection
-            .Setup(x => x.FindAsync(
-                It.IsAny<FilterDefinition<Transaction>>(),
+        _mockCollection
+            .Setup(x => x.FindAsync(It.IsAny<FilterDefinition<Transaction>>(),
                 It.IsAny<FindOptions<Transaction, Transaction>>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(mockCursor.Object);
+            .ReturnsAsync(cursor);
 
-        // Mock do banco de dados e cliente
-        var mockDatabase = new Mock<IMongoDatabase>();
-        mockDatabase
-            .Setup(d => d.GetCollection<Transaction>(It.IsAny<string>(), null))
-            .Returns(mockCollection.Object);
+        var repository = new DbTransacationRepository(_mockClient.Object, _mockSettings);
 
-        var mockClient = new Mock<IMongoClient>();
-        mockClient
-            .Setup(c => c.GetDatabase(It.IsAny<string>(), null))
-            .Returns(mockDatabase.Object);
-
-        // Configuração do MongoDbSettings
-        var mockSettings = Options.Create(new MongoDbSettings
-        {
-            DatabaseName = "TestDb",
-            CollectionName = "Transactions"
-        });
-
-        var repository = new DbTransacationRepository(mockClient.Object, mockSettings);
-
-        // Act
         var result = await repository.GetAllTransactionsAsync();
 
-        // Esperado
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
-        
+
         Assert.Equal("Lucas", result[0].Sender);
         Assert.Equal("Maria", result[0].Receiver);
         Assert.Equal(100m, result[0].Amount);
         Assert.Equal(TransactionStatus.Pending, result[0].Status);
         Assert.Equal(TransactionType.Credit, result[0].Type);
-        
+
         Assert.Equal("Patricia", result[1].Receiver);
         Assert.Equal("Mario", result[1].Sender);
         Assert.Equal(50m, result[1].Amount);
