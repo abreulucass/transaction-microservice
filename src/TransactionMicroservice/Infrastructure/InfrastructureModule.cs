@@ -1,6 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Bson;
 using MongoDB.Driver;
+using Azure.Messaging.ServiceBus;
 using TransactionMicroservice.Domain.Interfaces;
 using TransactionMicroservice.Infrastructure.Configurations;
 using TransactionMicroservice.Infrastructure.Messaging;
@@ -13,6 +12,7 @@ public static class InfrastructureModule
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDatabase(configuration);
+        services.AddMessageService(configuration);
         services.AddRepositories();
         services.AddMessaging();
         return services;
@@ -31,6 +31,27 @@ public static class InfrastructureModule
             return client;
         });
 
+        return services;
+    }
+
+    private static IServiceCollection AddMessageService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton<ServiceBusClient>(sp =>
+        {
+            var connectionString = configuration.GetConnectionString("ServiceBus");
+            return new ServiceBusClient(connectionString);
+        });
+
+        services.AddSingleton<ServiceBusSender>(sp =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            var client = sp.GetRequiredService<ServiceBusClient>();
+            var queueName = config["ServiceBus:QueueName"];
+            return client.CreateSender(queueName);
+        });
+
+        services.AddSingleton<ITransactionQueueService, MessageSenderService>();
+        
         return services;
     }
 

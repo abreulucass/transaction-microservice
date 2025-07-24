@@ -6,18 +6,11 @@ namespace TransactionMicroservice.Infrastructure.Messaging;
 
 public class MessageSenderService : ITransactionQueueService
 {
-    private readonly string _connectionString;
-    private readonly string _queueName;
-    private readonly ServiceBusClient _client;
     private readonly ServiceBusSender _sender;
 
-    public MessageSenderService(IConfiguration config)
+    public MessageSenderService(ServiceBusSender sender)
     {
-        _connectionString = config["ServiceBus:ConnectionString"];
-        _queueName = config["ServiceBus:QueueName"];
-        
-        _client = new ServiceBusClient(_connectionString);
-        _sender = _client.CreateSender(_queueName);
+        _sender = sender;
     }
     
     public async Task SendTransactionAsync<T>(T transaction)
