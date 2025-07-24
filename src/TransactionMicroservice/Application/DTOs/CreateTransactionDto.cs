@@ -6,6 +6,7 @@ namespace TransactionMicroservice.Application.DTOs;
 public class CreateTransactionDto
 {
     [Required(ErrorMessage = "O Valor da transação é obrigatorio")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "O valor deve ser maior que zero")]
     public decimal Amount { get; set; }
     
     [Required(ErrorMessage = "O Tipo da transação é obrigatorio")]
