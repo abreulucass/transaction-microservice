@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  transaction-api:
+    image: transaction-api:build  
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__MongoDb: SUASTRING
+      ConnectionStrings__AzureBusConnection: SUASTRING
+      MongoDbSettings__DatabaseName: TransactionDB
+      MongoDbSettings__CollectionName: transactions
+      AzureServiceBus__QueueName: NOMEDASUAFILA
+    

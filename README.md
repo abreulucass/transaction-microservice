@@ -12,8 +12,9 @@ Esse desafio foi desenvolvido como parte do Desafio Talent Lab 2025 - Bemol Digi
 - ASP.NET Core 8
 - MongoDB Atlas
 - Azure Service Bus
-- xUnit + Moq (testes)
+- xUnit + Moq + FluentAssertions (testes)
 - Clean Architecture
+- Docker
 
 ---
 
@@ -25,10 +26,18 @@ Esse desafio foi desenvolvido como parte do Desafio Talent Lab 2025 - Bemol Digi
 - Conta no [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 - Conta no [Microsoft Azure](https://azure.microsoft.com/)
 - Visual Studio, VS Code ou Rider
+- Docker (Opcional)
 
 ---
 
-### 🔐 1. Configurar variáveis no `appsettings.json`
+### 💻 1. Clone o repositório
+
+```
+git clone https://github.com/abreulucass/transaction-microservice.git
+cd transaction-microservice
+```
+
+### 🔐 2. Configurar variáveis no `appsettings.json`
 
 Crie ou edite o arquivo `appsettings.Development.json` com a seguinte estrutura:
 
@@ -48,7 +57,7 @@ Crie ou edite o arquivo `appsettings.Development.json` com a seguinte estrutura:
 }
 ```
 
-### ▶️ 2. Executar o projeto
+### ▶️ 3. Executar o projeto
 
 ```
 dotnet build
@@ -57,11 +66,35 @@ dotnet run --project src/TransactionMicroservice
 
 Acesse em https://localhost:5001/swagger para testar a API.
 
-### 🧪 3. Executar testes
+### 🧪 4. Executar testes
 
 ```
 dotnet test tests/TransactionMicroservice.Tests
 ```
+
+### 🐋 5. Executar com Docker
+
+1. Certifique-se que o Docker e Docker Compose estão instalados.
+
+2. No arquivo ***docker-compose.yml*** na parte de environment escreva suas strings de conexão:
+
+    ```dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__MongoDb: SUASTRING
+      ConnectionStrings__AzureBusConnection: SUASTRING
+      MongoDbSettings__DatabaseName: TransactionDB
+      MongoDbSettings__CollectionName: transactions
+      AzureServiceBus__QueueName: NOMEDASUAFILA
+    ```
+
+3. Na raiz do projeto, rode:
+
+    ```bash
+    docker-compose up --build
+    ```
+4. A API estará disponível em: http://localhost:8080/swagger
+
 ## 📦 Endpoints disponíveis
 | Verbo | Rota            | Descrição                 |
 | ----- | --------------- | ------------------------- |
