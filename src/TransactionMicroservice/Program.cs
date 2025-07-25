@@ -1,9 +1,6 @@
 using System.Text.Json.Serialization;
-using MongoDB.Bson;
-using MongoDB.Driver;
 using TransactionMicroservice.Application;
 using TransactionMicroservice.Infrastructure;
-using TransactionMicroservice.Infrastructure.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,17 +16,16 @@ builder.Services.AddControllers()
 
 var app = builder.Build();
 
-// Testando o Banco de Dados
-try {
-    var client = app.Services.GetRequiredService<IMongoClient>();
-    var database = client.GetDatabase("admin");
-    
-    var result = await database.RunCommandAsync<BsonDocument>(new BsonDocument("ping", 1));
-    Console.WriteLine("Pinged your deployment. You successfully connected to MongoDB!");
-} catch (Exception ex) {
-    Console.WriteLine("Failed to connect to MongoDB: " + ex.Message);
-    throw;
+// Testando o Conecção com Servicos Externos
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    await StartupDiagnostics.TestMongoConnectionAsync(services);
+    await StartupDiagnostics.TestAzureServiceBusConnectionAsync(services);
 }
+
+
 
 if (app.Environment.IsDevelopment())
 {
