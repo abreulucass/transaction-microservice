@@ -100,7 +100,7 @@ dotnet test tests/TransactionMicroservice.Tests
 | ----- |---------------------------|----------------------------------------------|
 | POST  | `api/transactions`        | Cria uma nova transação                      |
 | GET   | `api/transactions`        | Lista todas as transações                    |
-| GET   | `api/transactions/{id} `  | Mostra a transação referente ao id fornecido |
+| GET   | `api/transactions/{id} `  | Recupera a transação referente ao id fornecido |
 
 ## 🧠 Breve descrição
 
