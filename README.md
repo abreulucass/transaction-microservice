@@ -96,10 +96,10 @@ dotnet test tests/TransactionMicroservice.Tests
 4. A API estará disponível em: http://localhost:8080/swagger
 
 ## 📦 Endpoints disponíveis
-| Verbo | Rota            | Descrição                 |
-| ----- | --------------- | ------------------------- |
-| POST  | `/transactions` | Cria uma nova transação   |
-| GET   | `/transactions` | Lista todas as transações |
+| Verbo | Rota               | Descrição                 |
+| ----- |--------------------| ------------------------- |
+| POST  | `api/transactions` | Cria uma nova transação   |
+| GET   | `api/transactions`  | Lista todas as transações |
 
 ## 🧠 Breve descrição
 
@@ -121,17 +121,42 @@ A arquitetura segue uma separação em camadas (Domain, Application, Infrastruct
 
 ```
 TransactionMicroservice/
+├── Api/ # Camada de apresentação (Controllers HTTP)
+│     └── Controllers/
+│        └── TransactionController.cs # Endpoint para criação e listagem de transações
 │
-├── src/
-│   ├── TransactionMicroservice.Api          # Camada de entrada (controllers)
-│   ├── TransactionMicroservice.Application  # Regras de negócio e serviços
-│   ├── TransactionMicroservice.Domain       # Entidades, enums e interfaces
-│   └── TransactionMicroservice.Infrastructure # Repositórios, mensageria, configs
+├── Application/ # Camada de aplicação (casos de uso e DTOs)
+│     ├── DTOs/ # Objetos de transferência de dados
+│     │    ├── CreateTransactionDto.cs # DTO para criação de transação
+│     │    ├── TransactionDto.cs # DTO para retorno
+│     │    └── TransactionMessageDto.cs # DTO usado para mensagens na fila
+│     ├── Services/
+│     │    └── TransactionService.cs # Serviço de aplicação
+│     └── ApplicationModule.cs # Configuração da injeção de dependência
 │
-├── tests/
-│   └── TransactionMicroservice.Tests        # Testes unitários
+├── Domain/ # Camada de domínio (núcleo da aplicação)
+│     ├── Entities/
+│     │     └── Transaction.cs # Entidade que representa uma transação
+│     ├── Enums/
+│     │     ├── TransactionStatus.cs # Enum para status da transação
+│     │     └── TransactionType.cs # Enum para tipo da transação
+│     └── Interfaces/
+│           ├── ITransactionQueueService.cs # Interface para serviço de fila
+│           └── ITransactionRepository.cs # Interface para repositório de transações
 │
-└── README.md
+├── Helpers/
+│     └── JsonHelper.cs # Funções auxiliares para manipulação de JSON
+│
+└── Infrastructure/ # Camada de infraestrutura (implementações técnicas)
+      ├── Configurations/
+      │     ├── AzureBusServiceSettings.cs # Configurações do Azure Service Bus
+      │     └── MongoDbSettings.cs # Configurações do MongoDB
+      ├── Messaging/
+      │     └── MessageSenderService.cs # Serviço que envia mensagens para o Azure Bus
+      ├── Repositories/
+      │     └── DbTransactionRepository.cs # Implementação do repositório no MongoDB
+      ├── InfrastructureModule.cs # Injeção de dependência da camada infra
+      └── StartupDiagnostics.cs # Verificações iniciais de saúde/configuração
 ```
 
 ## 🙋 Autor
