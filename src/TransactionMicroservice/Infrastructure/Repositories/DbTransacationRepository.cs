@@ -25,4 +25,10 @@ public class DbTransacationRepository : ITransactionRepository
     {
         return await _collection.Find(_ => true).ToListAsync();
     }
+
+    public async Task<Transaction?> GetTransactionByIdAsync(String transactionId)
+    {
+        var filter = Builders<Transaction>.Filter.Eq(t => t.Id, transactionId);
+        return await _collection.Find(filter).FirstOrDefaultAsync();
+    }
 }

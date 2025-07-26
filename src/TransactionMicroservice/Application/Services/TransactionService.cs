@@ -74,4 +74,24 @@ public class TransactionService
 
         return listTransactionsDto;
     }
+
+    public async Task<TransactionDto?> GetTransactionById(String id)
+    {
+        var transaction = await _repository.GetTransactionByIdAsync(id);
+        
+        if(transaction == null) return null;
+        
+        var transactionDto = new TransactionDto
+        {
+            Id = transaction.Id,
+            Date = transaction.Date,
+            Amount = transaction.Amount,
+            Type = transaction.Type,
+            Status = transaction.Status,
+            Sender = transaction.Sender,
+            Receiver = transaction.Receiver,
+        };
+        
+        return transactionDto;
+    }
 }

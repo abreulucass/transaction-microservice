@@ -32,4 +32,15 @@ public class TransactionController: ControllerBase
         
         return Ok(transactions);
     }
+    
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetTransactionById(string id)
+    {
+        var transaction = await _transactionService.GetTransactionById(id);
+    
+        if (transaction == null)
+            return NotFound();
+
+        return Ok(transaction);
+    }
 }

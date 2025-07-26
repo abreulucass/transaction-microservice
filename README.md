@@ -96,22 +96,25 @@ dotnet test tests/TransactionMicroservice.Tests
 4. A API estará disponível em: http://localhost:8080/swagger
 
 ## 📦 Endpoints disponíveis
-| Verbo | Rota               | Descrição                 |
-| ----- |--------------------| ------------------------- |
-| POST  | `api/transactions` | Cria uma nova transação   |
-| GET   | `api/transactions`  | Lista todas as transações |
+| Verbo | Rota                      | Descrição                                    |
+| ----- |---------------------------|----------------------------------------------|
+| POST  | `api/transactions`        | Cria uma nova transação                      |
+| GET   | `api/transactions`        | Lista todas as transações                    |
+| GET   | `api/transactions/{id} `  | Mostra a transação referente ao id fornecido |
 
 ## 🧠 Breve descrição
 
 Este microsserviço permite:
 
- - Criar transações com remetente, destinatário, valor e tipo (Credit, Debit)
+- Criar transações com remetente, destinatário, valor e tipo (Credit, Debit)
 
 - Persistir as transações no MongoDB Atlas
 
 - Enviar os dados da transação para uma fila no Azure Service Bus (mensageria)
 
 - Recuperar todas as transações salvas
+
+- Recuperar transação por id
 
 - Executar testes automatizados com xUnit
 
