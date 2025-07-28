@@ -98,9 +98,9 @@ dotnet test tests/TransactionMicroservice.Tests
 ## 📦 Endpoints disponíveis
 | Verbo | Rota                      | Descrição                                    |
 | ----- |---------------------------|----------------------------------------------|
-| POST  | `api/transactions`        | Cria uma nova transação                      |
-| GET   | `api/transactions`        | Lista todas as transações                    |
-| GET   | `api/transactions/{id} `  | Recupera a transação referente ao id fornecido |
+| POST  | `api/transaction`        | Cria uma nova transação                      |
+| GET   | `api/transaction`        | Lista todas as transações                    |
+| GET   | `api/transaction/{id} `  | Recupera a transação referente ao id fornecido |
 
 ## 🧠 Breve descrição
 
